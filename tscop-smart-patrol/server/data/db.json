@@ -1,0 +1,717 @@
+{
+  "shifts": [
+    {
+      "id": 1,
+      "shift_code": "SHIFT-1",
+      "shift_name": "Shift A (Morning)",
+      "start_time": "06:00 AM",
+      "end_time": "02:00 PM",
+      "focus_areas": "School openings, college rush, bank cash vans, VIP corridors"
+    },
+    {
+      "id": 2,
+      "shift_code": "SHIFT-2",
+      "shift_name": "Shift B (Afternoon/Evening)",
+      "start_time": "02:00 PM",
+      "end_time": "10:00 PM",
+      "focus_areas": "College dismissals, evening markets, pandals & wine shops"
+    },
+    {
+      "id": 3,
+      "shift_code": "SHIFT-3",
+      "shift_name": "Shift C (Night)",
+      "start_time": "10:00 PM",
+      "end_time": "06:00 AM",
+      "focus_areas": "Night surveillance, jewelry market closures, ATM security"
+    }
+  ],
+  "officers": [
+    {
+      "id": 1,
+      "badge_no": "SHO-ABIDS",
+      "name": "Inspector K. Ravinder",
+      "designation": "Station House Officer",
+      "role": "SHO",
+      "station": "Abids PS",
+      "mobile": "9848011001",
+      "shift_id": 1,
+      "status": "Active"
+    },
+    {
+      "id": 2,
+      "badge_no": "B101",
+      "name": "Inspector Raj Kumar",
+      "designation": "SHO",
+      "role": "SHO",
+      "station": "Gachibowli PS",
+      "mobile": "9848011101",
+      "shift_id": 1,
+      "status": "Active"
+    },
+    {
+      "id": 3,
+      "badge_no": "B102",
+      "name": "SI Srinivas Rao",
+      "designation": "Sub-Inspector",
+      "role": "SI",
+      "station": "Abids PS",
+      "mobile": "9848011102",
+      "shift_id": 2,
+      "status": "Active"
+    },
+    {
+      "id": 4,
+      "badge_no": "B103",
+      "name": "Mahesh Babu",
+      "designation": "Constable",
+      "role": "PC",
+      "station": "Nallakunta PS",
+      "mobile": "9848011103",
+      "shift_id": 3,
+      "status": "Active"
+    },
+    {
+      "id": 5,
+      "badge_no": "BC-301",
+      "name": "Srihari Narayanan",
+      "designation": "Head Constable (BC3)",
+      "role": "PC",
+      "station": "Abids PS",
+      "mobile": "9848011301",
+      "shift_id": 1,
+      "status": "Active"
+    },
+    {
+      "id": 6,
+      "badge_no": "BC-302",
+      "name": "E. Sathaiah",
+      "designation": "Police Constable",
+      "role": "PC",
+      "station": "Abids PS",
+      "mobile": "9848011302",
+      "shift_id": 1,
+      "status": "Active"
+    },
+    {
+      "id": 7,
+      "badge_no": "CTRL-01",
+      "name": "Praveen Tallakokula",
+      "designation": "Dispatcher",
+      "role": "ADMIN",
+      "station": "Control Room",
+      "mobile": "9848011900",
+      "shift_id": 1,
+      "status": "Active"
+    }
+  ],
+  "vehicles": [
+    {
+      "id": 1,
+      "vehicle_no": "TS09PA1001",
+      "call_sign": "PC-ABIDS-1",
+      "vehicle_type": "Patrol Car",
+      "zone": "East Zone",
+      "station": "Abids PS",
+      "officer_name": "E. Sathaiah",
+      "shift_id": 1,
+      "status": "Diverted",
+      "latitude": 17.390825,
+      "longitude": 78.477163,
+      "speed_kmh": 45,
+      "heading": 133,
+      "active_plan": "PLAN A"
+    },
+    {
+      "id": 2,
+      "vehicle_no": "BC3",
+      "call_sign": "BLUE-COLT-3",
+      "vehicle_type": "Blue Colt",
+      "zone": "East Zone",
+      "station": "Abids PS",
+      "officer_name": "Srihari Narayanan",
+      "shift_id": 1,
+      "status": "On Patrol",
+      "latitude": 17.396575,
+      "longitude": 78.470775,
+      "speed_kmh": 24,
+      "heading": 203,
+      "active_plan": "PLAN A"
+    },
+    {
+      "id": 3,
+      "vehicle_no": "TS09PA1002",
+      "call_sign": "PC-GCH-1",
+      "vehicle_type": "Patrol Car",
+      "zone": "West Zone",
+      "station": "Gachibowli PS",
+      "officer_name": "Raj Kumar",
+      "shift_id": 1,
+      "status": "Available",
+      "latitude": 17.441,
+      "longitude": 78.3502,
+      "speed_kmh": 0,
+      "heading": 0,
+      "active_plan": "PLAN B"
+    },
+    {
+      "id": 4,
+      "vehicle_no": "TS09PA1003",
+      "call_sign": "PC-RDG-1",
+      "vehicle_type": "Patrol Car",
+      "zone": "West Zone",
+      "station": "Raidurgam PS",
+      "officer_name": "Srinivas Rao",
+      "shift_id": 2,
+      "status": "Responding",
+      "latitude": 17.4435,
+      "longitude": 78.3772,
+      "speed_kmh": 24,
+      "heading": 131,
+      "active_plan": "PLAN B"
+    },
+    {
+      "id": 5,
+      "vehicle_no": "BC7-GCH",
+      "call_sign": "BLUE-COLT-7",
+      "vehicle_type": "Blue Colt",
+      "zone": "West Zone",
+      "station": "Madhapur PS",
+      "officer_name": "Mahesh Babu",
+      "shift_id": 2,
+      "status": "On Patrol",
+      "latitude": 17.448062,
+      "longitude": 78.376812,
+      "speed_kmh": 24,
+      "heading": 57,
+      "active_plan": "PLAN C"
+    },
+    {
+      "id": 6,
+      "vehicle_no": "PV003",
+      "call_sign": "PC-PNJ-1",
+      "vehicle_type": "Patrol Car",
+      "zone": "Central Zone",
+      "station": "Panjagutta PS",
+      "officer_name": "Ramesh Goud",
+      "shift_id": 1,
+      "status": "Available",
+      "latitude": 17.424,
+      "longitude": 78.453,
+      "speed_kmh": 14,
+      "heading": 315,
+      "active_plan": "PLAN A"
+    }
+  ],
+  "pointBooks": [
+    {
+      "id": 1,
+      "pb_code": "PBA226471",
+      "name": "Andhra Bank ATM - Public Gardens",
+      "category": "ATM",
+      "pb_type": "Security Guard",
+      "sector": "Sector-1",
+      "station": "Abids PS",
+      "zone": "EZ",
+      "district": "HYDERABAD",
+      "holder_name": "Rajendra Prasad",
+      "holder_mobile": "9899754222",
+      "latitude": 17.3976,
+      "longitude": 78.4712,
+      "address": "5-10-174, Fateh Maidan Rd, Public Gardens, Nampally, 500004",
+      "description": "High-footfall ATM opposite Public Gardens; requires night guard check.",
+      "is_sensitive": false,
+      "visit_status": "Visited",
+      "last_visited_at": "2026-11-09T17:41:18.136Z",
+      "plans": {
+        "PLAN A": {
+          "1": "10:30 AM",
+          "2": "04:15 PM",
+          "3": "11:30 PM"
+        },
+        "PLAN B": {
+          "1": "08:45 AM",
+          "2": "03:15 PM",
+          "3": "01:00 AM"
+        },
+        "PLAN C": {
+          "1": "11:30 AM",
+          "2": "05:45 PM",
+          "3": "02:15 AM"
+        },
+        "PLAN D": {
+          "1": "09:15 AM",
+          "2": "06:30 PM",
+          "3": "03:45 AM"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "pb_code": "PB23243",
+      "name": "State Bank ATM - Abids Circle",
+      "category": "ATM",
+      "pb_type": "Security Guard",
+      "sector": "Abids",
+      "station": "Abids PS",
+      "zone": "EZ",
+      "district": "HYDERABAD",
+      "holder_name": "Rajendra",
+      "holder_mobile": "9899754222",
+      "latitude": 17.3906,
+      "longitude": 78.4774,
+      "address": "Flat 102, Balaji Apartments, Shanthi Colony, Abids, 500002",
+      "description": "Commercial jewelry & banking cluster ATM.",
+      "is_sensitive": true,
+      "visit_status": "Visited",
+      "last_visited_at": "2026-11-09T20:10:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "09:00 AM",
+          "2": "09:25 AM",
+          "3": "11:00 PM"
+        },
+        "PLAN B": {
+          "1": "10:15 AM",
+          "2": "04:30 PM",
+          "3": "12:15 AM"
+        },
+        "PLAN C": {
+          "1": "08:30 AM",
+          "2": "06:00 PM",
+          "3": "01:30 AM"
+        },
+        "PLAN D": {
+          "1": "11:45 AM",
+          "2": "05:15 PM",
+          "3": "03:00 AM"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "pb_code": "PB-COL-01",
+      "name": "Nampally Junior & Degree College",
+      "category": "College",
+      "pb_type": "Picket",
+      "sector": "Sector-1",
+      "station": "Abids PS",
+      "zone": "EZ",
+      "district": "HYDERABAD",
+      "holder_name": "Dr. Venkatesh (Principal)",
+      "holder_mobile": "9848022110",
+      "latitude": 17.3935,
+      "longitude": 78.4695,
+      "address": "Station Road, Nampally, Hyderabad, 500001",
+      "description": "College entry/dispersal safety point; monitor outsider loitering.",
+      "is_sensitive": true,
+      "visit_status": "Non Visited",
+      "last_visited_at": "2026-11-08T18:00:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "08:25 AM",
+          "2": "04:20 PM",
+          "3": "10:45 PM"
+        },
+        "PLAN B": {
+          "1": "09:30 AM",
+          "2": "03:30 PM",
+          "3": "12:00 AM"
+        },
+        "PLAN C": {
+          "1": "08:15 AM",
+          "2": "05:00 PM",
+          "3": "01:15 AM"
+        },
+        "PLAN D": {
+          "1": "10:00 AM",
+          "2": "06:15 PM",
+          "3": "02:30 AM"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "pb_code": "PB-WIN-02",
+      "name": "Panjagutta Metro Wine Shop",
+      "category": "Wine Shop",
+      "pb_type": "Point book Holder",
+      "sector": "Sector-2",
+      "station": "Panjagutta PS",
+      "zone": "CZ",
+      "district": "HYDERABAD",
+      "holder_name": "K. Narasimha",
+      "holder_mobile": "9848033221",
+      "latitude": 17.4265,
+      "longitude": 78.4512,
+      "address": "Panjagutta X Roads, Main Road, Hyderabad, 500082",
+      "description": "Late-evening crowd surge hotspot; closing time enforcement at 10:30 PM.",
+      "is_sensitive": true,
+      "visit_status": "Sensitive",
+      "last_visited_at": "2026-11-09T18:30:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "11:15 AM",
+          "2": "05:45 PM",
+          "3": "10:15 PM"
+        },
+        "PLAN B": {
+          "1": "12:00 PM",
+          "2": "07:00 PM",
+          "3": "11:00 PM"
+        },
+        "PLAN C": {
+          "1": "10:30 AM",
+          "2": "06:15 PM",
+          "3": "10:45 PM"
+        },
+        "PLAN D": {
+          "1": "01:15 PM",
+          "2": "08:30 PM",
+          "3": "11:30 PM"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "pb_code": "PB-GAN-03",
+      "name": "Khairatabad Ganesh Mandap Point",
+      "category": "Mandap/Pandal",
+      "pb_type": "Ganesh Pandal",
+      "sector": "Sector-1",
+      "station": "Khairatabad PS",
+      "zone": "CZ",
+      "district": "HYDERABAD",
+      "holder_name": "Mandap Committee Lead",
+      "holder_mobile": "9848044332",
+      "latitude": 17.4126,
+      "longitude": 78.4602,
+      "address": "Khairatabad Circle, Mint Compound Road, 500004",
+      "description": "Major festival pandal & dense commuter junction.",
+      "is_sensitive": true,
+      "visit_status": "Non Visited",
+      "last_visited_at": "2026-11-08T09:00:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "07:45 AM",
+          "2": "05:00 PM",
+          "3": "11:15 PM"
+        },
+        "PLAN B": {
+          "1": "08:30 AM",
+          "2": "06:15 PM",
+          "3": "12:30 AM"
+        },
+        "PLAN C": {
+          "1": "09:45 AM",
+          "2": "04:30 PM",
+          "3": "01:45 AM"
+        },
+        "PLAN D": {
+          "1": "10:30 AM",
+          "2": "07:15 PM",
+          "3": "02:15 AM"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "pb_code": "PB-GOV-01",
+      "name": "Telangana Secretariat South Gate",
+      "category": "Govt Office",
+      "pb_type": "Check Post",
+      "sector": "Sector-1",
+      "station": "Abids PS",
+      "zone": "EZ",
+      "district": "HYDERABAD",
+      "holder_name": "Duty Inspector Reserve",
+      "holder_mobile": "9848055443",
+      "latitude": 17.4052,
+      "longitude": 78.4685,
+      "address": "Secretariat Road, Hussain Sagar South, 500022",
+      "description": "VIP & Dharna sensitive perimeter.",
+      "is_sensitive": true,
+      "visit_status": "Visited",
+      "last_visited_at": "2026-11-09T20:45:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "09:45 AM",
+          "2": "03:15 PM",
+          "3": "11:45 PM"
+        },
+        "PLAN B": {
+          "1": "10:30 AM",
+          "2": "04:45 PM",
+          "3": "12:45 AM"
+        },
+        "PLAN C": {
+          "1": "08:45 AM",
+          "2": "02:30 PM",
+          "3": "01:15 AM"
+        },
+        "PLAN D": {
+          "1": "11:15 AM",
+          "2": "05:30 PM",
+          "3": "02:30 AM"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "pb_code": "PB-JWL-01",
+      "name": "Abids Jewelry Bazaar Corridor",
+      "category": "Crime Hotspot",
+      "pb_type": "Check Post",
+      "sector": "Abids",
+      "station": "Abids PS",
+      "zone": "EZ",
+      "district": "HYDERABAD",
+      "holder_name": "Jewelers Assoc. Pres.",
+      "holder_mobile": "9848045678",
+      "latitude": 17.3889,
+      "longitude": 78.4761,
+      "address": "Tilak Road, Abids Jewelry Market, 500001",
+      "description": "Predictive AI static visibility point during closing hours.",
+      "is_sensitive": true,
+      "visit_status": "Non Visited",
+      "last_visited_at": "2026-11-08T22:15:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "11:45 AM",
+          "2": "07:30 PM",
+          "3": "01:30 AM"
+        },
+        "PLAN B": {
+          "1": "10:15 AM",
+          "2": "08:15 PM",
+          "3": "02:15 AM"
+        },
+        "PLAN C": {
+          "1": "12:30 PM",
+          "2": "06:45 PM",
+          "3": "01:00 AM"
+        },
+        "PLAN D": {
+          "1": "09:30 AM",
+          "2": "09:00 PM",
+          "3": "03:15 AM"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "pb_code": "PB-SCH-05",
+      "name": "St. Alberts High School Gate",
+      "category": "School",
+      "pb_type": "Polling Booth",
+      "sector": "Sector-2",
+      "station": "Abids PS",
+      "zone": "EZ",
+      "district": "HYDERABAD",
+      "holder_name": "Mrs. Padma (Head)",
+      "holder_mobile": "9848077665",
+      "latitude": 17.3868,
+      "longitude": 78.4728,
+      "address": "Aghapura Main Rd, Nampally, 500001",
+      "description": "School drop-off/pickup visibility & designated polling center.",
+      "is_sensitive": false,
+      "visit_status": "Non Visited",
+      "last_visited_at": "2026-11-09T07:45:00Z",
+      "plans": {
+        "PLAN A": {
+          "1": "08:15 AM",
+          "2": "02:45 PM",
+          "3": "10:30 PM"
+        },
+        "PLAN B": {
+          "1": "09:00 AM",
+          "2": "03:30 PM",
+          "3": "11:45 PM"
+        },
+        "PLAN C": {
+          "1": "07:30 AM",
+          "2": "04:15 PM",
+          "3": "12:15 AM"
+        },
+        "PLAN D": {
+          "1": "08:45 AM",
+          "2": "01:45 PM",
+          "3": "01:30 AM"
+        }
+      }
+    }
+  ],
+  "incidents": [
+    {
+      "id": 1,
+      "incident_code": "INC001",
+      "incident_type": "Murder",
+      "priority": "P1",
+      "sla_minutes": 10,
+      "station": "Gachibowli PS",
+      "location_name": "Wipro Circle / Financial District",
+      "latitude": 17.4435,
+      "longitude": 78.3772,
+      "description": "Urgent Dial 100 report: homicide scene near construction perimeter; nearest patrol dispatched.",
+      "reported_time": "2026-11-09T21:40:00Z",
+      "status": "Assigned",
+      "assigned_vehicle": "TS09PA1002",
+      "investigating_officer": "Inspector Raj Kumar",
+      "action_taken": null
+    },
+    {
+      "id": 2,
+      "incident_code": "INC002",
+      "incident_type": "Armed Robbery",
+      "priority": "P1",
+      "sla_minutes": 15,
+      "station": "Abids PS",
+      "location_name": "Tilak Road Jewelry Lane, Abids",
+      "latitude": 17.4465,
+      "longitude": 78.381,
+      "description": "Two suspects fled on motorbike near ATM kiosk; CCTV sweep active.",
+      "reported_time": "2026-11-09T21:55:00Z",
+      "status": "In Progress",
+      "assigned_vehicle": "TS09PA1001",
+      "investigating_officer": "SI Srinivas Rao",
+      "action_taken": null
+    },
+    {
+      "id": 3,
+      "incident_code": "INC003",
+      "incident_type": "College Security Alert",
+      "priority": "P2",
+      "sla_minutes": 20,
+      "station": "Abids PS",
+      "location_name": "Nampally Junior College Gate",
+      "latitude": 17.3935,
+      "longitude": 78.4695,
+      "description": "Suspicious outsider group reported outside college gate during dispersal window.",
+      "reported_time": "2026-11-09T22:10:00Z",
+      "status": "Open",
+      "assigned_vehicle": "BC3",
+      "investigating_officer": "HC Srihari Narayanan",
+      "action_taken": null
+    }
+  ],
+  "dailyRouteAssignments": {
+    "Abids PS": {
+      "1": "PLAN A",
+      "2": "PLAN C",
+      "3": "PLAN D"
+    },
+    "Gachibowli PS": {
+      "1": "PLAN B",
+      "2": "PLAN C",
+      "3": "PLAN D"
+    },
+    "Panjagutta PS": {
+      "1": "PLAN A",
+      "2": "PLAN B",
+      "3": "PLAN A"
+    },
+    "Khairatabad PS": {
+      "1": "PLAN A",
+      "2": "PLAN B",
+      "3": "PLAN C"
+    }
+  },
+  "shoOverrides": [
+    {
+      "id": "OVR-101",
+      "pb_code": "PB-COL-01",
+      "field": "Shift 1 Timing",
+      "ai_suggested": "08:45 AM",
+      "sho_modified": "08:30 AM",
+      "reason": "College assembly begins at 08:30 AM; presence required 15 mins earlier.",
+      "authorized_by": "SHO Inspector K. Ravinder",
+      "timestamp": "2026-11-09T22:20:00Z"
+    },
+    {
+      "id": "OVR-4894",
+      "pb_code": "PB-COL-01",
+      "field": "Shift 1 Timing",
+      "sho_modified": "08:20 AM",
+      "reason": "Early campus prayer",
+      "authorized_by": "SHO Inspector K. Ravinder",
+      "timestamp": "2026-11-09T17:09:14.894Z"
+    },
+    {
+      "id": "OVR-1963",
+      "pb_code": "PB-COL-01",
+      "field": "Shift 1 Timing",
+      "sho_modified": "08:25 AM",
+      "reason": "College assembly commences early; presence required 15 mins prior.",
+      "authorized_by": "SHO Inspector K. Ravinder",
+      "timestamp": "2026-11-09T17:18:31.963Z"
+    },
+    {
+      "id": "OVR-8543",
+      "pb_code": "PB23243",
+      "field": "Shift 2 Timing",
+      "sho_modified": "09:25 AM",
+      "reason": "Cash loading",
+      "authorized_by": "SHO Inspector K. Ravinder",
+      "timestamp": "2026-11-09T17:19:08.543Z"
+    }
+  ],
+  "visits": [
+    {
+      "id": 4,
+      "pb_code": "PBA226471",
+      "pb_name": "Andhra Bank ATM - Public Gardens",
+      "scheduled_time": "10:30 AM",
+      "actual_time": "11:11 PM",
+      "deviation_formatted": "00:02:30 HRS",
+      "distance_meters": 15,
+      "geofence_ok": true,
+      "remarks_native": "అంతా బాగానే ఉంది.",
+      "remarks_english": "[Telugu Log Translated] Field observation: అంతా బాగానే ఉంది.",
+      "detected_language": "Telugu (తెలుగు)",
+      "provider": "TSCOP Police NLP Engine (Offline Fallback)",
+      "sensitive_flagged": false,
+      "visited_at": "2026-11-09T17:41:18.205Z"
+    },
+    {
+      "id": 3,
+      "pb_code": "PBA226471",
+      "pb_name": "Andhra Bank ATM - Public Gardens",
+      "scheduled_time": "10:30 AM",
+      "actual_time": "10:51 PM",
+      "deviation_formatted": "00:02:30 HRS",
+      "distance_meters": 15,
+      "geofence_ok": true,
+      "remarks_native": "కళాశాల గేటు వద్ద అనుమానాస్పద వ్యక్తులు ఉన్నారు",
+      "remarks_english": "Suspicious individuals gathered near the college main gate; preventive field verification initiated.",
+      "sensitive_flagged": true,
+      "visited_at": "2026-11-09T17:21:28.930Z"
+    },
+    {
+      "id": 2,
+      "pb_code": "PBA226471",
+      "pb_name": "Andhra Bank ATM - Public Gardens",
+      "scheduled_time": "10:30 AM",
+      "actual_time": "10:51 PM",
+      "deviation_formatted": "00:02:30 HRS",
+      "distance_meters": 15,
+      "geofence_ok": true,
+      "remarks_native": "కళాశాల గేటు వద్ద అనుమానాస్పద వ్యక్తులు ఉన్నారు",
+      "remarks_english": "Suspicious individuals gathered near the college main gate; preventive field verification initiated.",
+      "sensitive_flagged": true,
+      "visited_at": "2026-11-09T17:21:04.459Z"
+    },
+    {
+      "id": 1,
+      "pb_code": "PBA226471",
+      "pb_name": "Andhra Bank ATM - Public Gardens",
+      "scheduled_time": "10:30 AM",
+      "actual_time": "10:32 AM",
+      "deviation_formatted": "00:02:30 HRS",
+      "distance_meters": 14.2,
+      "geofence_ok": true,
+      "remarks_native": "ఏటీఎం వద్ద భద్రత బాగానే ఉంది, అనుమానాస్పద కదలికలు లేవు",
+      "remarks_english": "ATM premises checked; security guard present and no suspicious activity observed.",
+      "sensitive_flagged": false,
+      "visited_at": "2026-11-09T20:30:00Z"
+    }
+  ]
+}

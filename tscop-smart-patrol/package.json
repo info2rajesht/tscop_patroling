@@ -1,0 +1,10 @@
+{
+  "name": "tscop-smart-patrol-react",
+  "version": "1.0.0",
+  "description": "TSCOP Smart Patrol Management System with Historical AI Analytics & SHO Overrides",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "keywords": ["patrol", "police", "react", "geofencing", "sho-override"]
+}

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TSCOP / Fusion safeOS — Smart Patrol & Beat Management Demo</title>
+
+  <!-- Leaflet GIS CSS & Chart.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="theme-light">
+  <!-- Top Command Header -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">TSCOP</div>
+      <div>
+        <div class="brand-title">Smart Patrol &amp; Beat Management <span style="opacity:0.7;font-weight:400;">| Fusion safeOS</span></div>
+        <div class="brand-sub">Node.js Real-Time Gateway + Python FastAPI AI &amp; GIS Engine</div>
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <span class="pill-status" title="Node.js Express + Socket.IO Gateway">
+        <span class="dot dot-green" id="dot-node"></span> Node:3000
+      </span>
+      <span class="pill-status" title="Python FastAPI AI & Spatial DB">
+        <span class="dot dot-amber" id="dot-python"></span> <span id="lbl-python-status">Python:8000</span>
+      </span>
+
+      <button class="btn-top" id="btn-sim-toggle" onclick="App.toggleSimulator()">⏸ GPS Sim: ON</button>
+
+      <select class="top-select" id="role-select" onchange="App.changeRole(this.value)" title="Switch Police Role">
+        <option value="SHO">Role: SHO (Full Override)</option>
+        <option value="ADMIN">Role: Control Room / Admin</option>
+        <option value="PC">Role: Field PC (BC3)</option>
+      </select>
+
+      <button class="btn-top" id="btn-theme" onclick="App.toggleTheme()">🌙 Dark (Fusion)</button>
+      <button class="btn-top" id="btn-siren" onclick="App.toggleSiren()">🔊 Siren: ON</button>
+      <button class="btn-top" onclick="App.resetDemo()" title="Restore fresh demo seed data">↺ Reset Demo</button>
+      <button class="btn-top btn-emergency" onclick="Workflows.quickTriggerDial100()">🚨 Dial 100 Emergency</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <!-- Left Navigation Sidebar -->
+    <nav class="sidebar">
+      <div class="nav-section-label">Command &amp; GIS</div>
+      <button class="nav-item active" data-view="dashboard" onclick="App.switchView('dashboard')">📊 Command Dashboard</button>
+      <button class="nav-item" data-view="gis-planner" onclick="App.switchView('gis-planner')">🗺️ Live GIS &amp; Beat Planner</button>
+      <button class="nav-item" data-view="today-routes" onclick="App.switchView('today-routes')">📅 Today Route Plan (3 Shifts)</button>
+
+      <div class="nav-section-label">Point Books &amp; Dispatch</div>
+      <button class="nav-item" data-view="pb-matrix" onclick="App.switchView('pb-matrix')">📘 PB Matrix &amp; Entry</button>
+      <button class="nav-item" data-view="dial100" onclick="App.switchView('dial100')">🚨 Dial 100 Diversion Flow</button>
+      <button class="nav-item" data-view="mobile-app" onclick="App.switchView('mobile-app')">📱 Mobile Constable App</button>
+
+      <div class="nav-section-label">Operations &amp; AI</div>
+      <button class="nav-item" data-view="incidents" onclick="App.switchView('incidents')">⚠️ Incidents &amp; SLA Console</button>
+      <button class="nav-item" data-view="ai-reports" onclick="App.switchView('ai-reports')">🤖 AI Insights &amp; SHO Reports</button>
+
+      <div style="margin-top:auto; padding:12px 10px; border-top:1px solid rgba(255,255,255,0.12); font-size:11px; opacity:0.8;">
+        <div id="sidebar-role-banner">Active: SHO_ABIDS (Override OK)</div>
+        <div style="margin-top:4px;">3 Shifts: 06-14 | 14-22 | 22-06</div>
+      </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+
+      <!-- ================================================================
+           VIEW 1: COMMAND CENTER DASHBOARD
+           ================================================================ -->
+      <section id="view-dashboard" class="view-panel active">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Smart City Police Command Dashboard</h1>
+            <p class="page-subtitle">Real-time patrol fleet telemetry, incident SLA tracking, 3-shift manpower &amp; blind-spot coverage</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="App.switchView('gis-planner')">Open Full GIS Map</button>
+            <button class="btn btn-pink" onclick="App.switchView('mobile-app')">Open Constable Mobile App</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" id="dashboard-kpis"></div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Live Hyderabad Patrol Fleet &amp; Active Incidents</h3>
+              <span class="badge badge-visited" id="live-tick-badge">Telemetry Live</span>
+            </div>
+            <div id="map-dashboard" class="map-box"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Analytics: Incident Priority &amp; Shift Manpower</h3>
+            </div>
+            <div style="height:175px; margin-bottom:12px;">
+              <canvas id="chart-incidents"></canvas>
+            </div>
+            <div style="height:175px;">
+              <canvas id="chart-shifts"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Active Incidents &amp; SLA Status</h3>
+              <button class="btn btn-outline btn-sm" onclick="App.switchView('incidents')">Manage All →</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>ID</th><th>Type</th><th>Priority</th><th>Station</th><th>Vehicle</th><th>Status</th></tr>
+                </thead>
+                <tbody id="dash-incidents-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">SHO News Feed &amp; Proactive Advisories</h3>
+              <button class="btn btn-outline btn-sm" onclick="App.switchView('ai-reports')">AI Insights →</button>
+            </div>
+            <div id="dash-advisories-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 2: LIVE GIS & FUSION BEAT PLANNER
+           ================================================================ -->
+      <section id="view-gis-planner" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Live GIS Tracking &amp; Fusion Beat Planner</h1>
+            <p class="page-subtitle">Area-Oriented vs Crime-Oriented route generation, Crime Hotspot heatmap, Crime Corridors &amp; Planned vs Actual comparison</p>
+          </div>
+        </div>
+
+        <div class="layer-bar">
+          <label class="layer-toggle"><input type="checkbox" id="layer-vehicles" checked onchange="Maps.refreshGISLayers()"> 🚓 Live Patrol Vehicles</label>
+          <label class="layer-toggle"><input type="checkbox" id="layer-pbs" checked onchange="Maps.refreshGISLayers()"> 📍 Point Books (30m Geofence)</label>
+          <label class="layer-toggle"><input type="checkbox" id="layer-hotspots" checked onchange="Maps.refreshGISLayers()"> 🔥 Crime Hotspot Layer</label>
+          <label class="layer-toggle"><input type="checkbox" id="layer-corridors" onchange="Maps.refreshGISLayers()"> 🛣️ Crime Corridors</label>
+          <label class="layer-toggle"><input type="checkbox" id="layer-colleges" checked onchange="Maps.refreshGISLayers()"> 🎓 College Geofences</label>
+          <label class="layer-toggle"><input type="checkbox" id="layer-actual" checked onchange="Maps.refreshGISLayers()"> 🟠 Planned vs Actual Route</label>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="padding:10px;">
+            <div id="map-gis-main" class="map-box map-box-lg"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Beat Planner (Fusion safeOS Workflow)</h3>
+              <span class="badge badge-info" id="planner-distance-badge">Distance: 0 Kms</span>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Police Station</label>
+                <select class="select" id="bp-station">
+                  <option value="All">All Stations</option>
+                  <option value="Abids PS" selected>Abids PS</option>
+                  <option value="Gachibowli PS">Gachibowli PS</option>
+                  <option value="Panjagutta PS">Panjagutta PS</option>
+                  <option value="Raidurgam PS">Raidurgam PS</option>
+                  <option value="Madhapur PS">Madhapur PS</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Sector</label>
+                <select class="select" id="bp-sector">
+                  <option value="All">All Sectors</option>
+                  <option value="Sector-1">Sector-1</option>
+                  <option value="Sector-2">Sector-2</option>
+                  <option value="Sector-I">Sector-I</option>
+                  <option value="Sector-II">Sector-II</option>
+                  <option value="Abids">Abids</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Method of Approach</label>
+                <select class="select" id="bp-method">
+                  <option value="Area Oriented">Area Oriented (Shortest Loop)</option>
+                  <option value="Crime Oriented">Crime Oriented (High-Risk Priority)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Shift</label>
+                <select class="select" id="bp-shift">
+                  <option value="1">Shift 1 (06:00 AM - 02:00 PM)</option>
+                  <option value="2">Shift 2 (02:00 PM - 10:00 PM)</option>
+                  <option value="3">Shift 3 (10:00 PM - 06:00 AM)</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="Maps.runBeatPlanner()">⚡ RECOMMENDED BEAT POINTS</button>
+              <button class="btn btn-outline" onclick="Maps.clearPlannedRoute()">Clear</button>
+            </div>
+
+            <div class="table-wrap" style="max-height:310px; overflow-y:auto;">
+              <table>
+                <thead>
+                  <tr><th>#</th><th>Point Book</th><th>Category</th><th>Time</th><th>Leg (km)</th></tr>
+                </thead>
+                <tbody id="bp-points-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 3: TODAY ROUTE PLAN (3 SHIFTS GEO-GRAPHICAL VIEW)
+           ================================================================ -->
+      <section id="view-today-routes" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Today Route Plan &amp; Shift-Wise Geo-Graphical View</h1>
+            <p class="page-subtitle">Daily non-predictable rotation of Plan A / B / C / D across Shift 1, Shift 2 &amp; Shift 3 (SHO &amp; Control Room)</p>
+          </div>
+          <button class="btn btn-pink" id="btn-submit-daily" onclick="Workflows.saveDailyRoutes()">✔ SUBMIT TODAY ROUTE PLAN</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Station-Wise Daily Shift Route Assignment</h3>
+            <span class="badge badge-high" id="daily-role-note">SHO / Admin Daily Confirmation</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Police Station</th>
+                  <th>Shift 1 (06 AM - 02 PM)</th>
+                  <th>Shift 2 (02 PM - 10 PM)</th>
+                  <th>Shift 3 (10 PM - 06 AM)</th>
+                </tr>
+              </thead>
+              <tbody id="daily-routes-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card" style="padding:0;">
+            <div class="shift-card-banner"><span>SHIFT 1 GEO-GRAPHICAL VIEW (06:00 - 14:00)</span><span id="badge-s1-count"></span></div>
+            <div id="map-shift-1" class="map-box map-box-shift" style="border-radius:0 0 8px 8px;"></div>
+          </div>
+          <div class="card" style="padding:0;">
+            <div class="shift-card-banner"><span>SHIFT 2 GEO-GRAPHICAL VIEW (14:00 - 22:00)</span><span id="badge-s2-count"></span></div>
+            <div id="map-shift-2" class="map-box map-box-shift" style="border-radius:0 0 8px 8px;"></div>
+          </div>
+          <div class="card" style="padding:0;">
+            <div class="shift-card-banner"><span>SHIFT 3 GEO-GRAPHICAL VIEW (22:00 - 06:00)</span><span id="badge-s3-count"></span></div>
+            <div id="map-shift-3" class="map-box map-box-shift" style="border-radius:0 0 8px 8px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 4: POINT BOOK MATRIX & REGISTRATION
+           ================================================================ -->
+      <section id="view-pb-matrix" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Point Book Route Plan Assignment Matrix &amp; Entry</h1>
+            <p class="page-subtitle">Expand any Point Book row to customize Plan A / B / C / D shift visit timings, or register a new Point Book</p>
+          </div>
+          <button class="btn btn-pink" onclick="Workflows.toggleNewPBForm()">+ Register New Point Book</button>
+        </div>
+
+        <!-- Register New Point Book Card (collapsible) -->
+        <div class="card" id="new-pb-card" style="display:none; border-left:4px solid var(--accent-pink);">
+          <div class="card-header">
+            <h3 class="card-title">Register New Point Book (Jurisdiction Coverage)</h3>
+            <button class="btn btn-outline btn-sm" onclick="Workflows.toggleNewPBForm()">Close</button>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Point Book Name *</label><input class="input" id="npb-name" placeholder="e.g., Charminar Jewelry ATM"></div>
+            <div class="field"><label>Category</label>
+              <select class="select" id="npb-cat">
+                <option>ATM</option><option>College</option><option>School</option><option>Bank</option>
+                <option>Wine Shop</option><option>Shopping Mall</option><option>Govt Office</option><option>Crime Hotspot</option>
+              </select>
+            </div>
+            <div class="field"><label>Pointbook Type</label>
+              <select class="select" id="npb-type">
+                <option>Security Guard</option><option>Point book Holder</option><option>Picket</option>
+                <option>Polling Booth</option><option>Ganesh Pandal</option><option>Durga Matha Mandap</option>
+                <option>Check Post</option><option>Senior Citizen</option>
+              </select>
+            </div>
+            <div class="field"><label>Police Station</label>
+              <select class="select" id="npb-station">
+                <option>Abids PS</option><option>Gachibowli PS</option><option>Panjagutta PS</option>
+                <option>Khairatabad PS</option><option>Madhapur PS</option><option>Raidurgam PS</option>
+              </select>
+            </div>
+            <div class="field"><label>Sector</label><input class="input" id="npb-sector" value="Sector-1"></div>
+            <div class="field"><label>Holder Name</label><input class="input" id="npb-holder" placeholder="Guard / Contact Name"></div>
+            <div class="field"><label>Mobile Number</label><input class="input" id="npb-mobile" placeholder="9848000000"></div>
+            <div class="field"><label>Latitude</label><input class="input" id="npb-lat" type="number" step="0.0001" value="17.3948"></div>
+            <div class="field"><label>Longitude</label><input class="input" id="npb-lon" type="number" step="0.0001" value="78.4742"></div>
+            <div class="field"><label>Address</label><input class="input" id="npb-addr" placeholder="Street, Landmark, Hyderabad"></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <label style="font-size:12.5px;"><input type="checkbox" id="npb-sens"> Mark as Sensitive / Crime-Prone Area</label>
+            <button class="btn btn-pink" onclick="Workflows.createPointBook()">Save Point Book</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Point Book Master Registry (Click ▶ to edit Plan A-D Shift Timings)</h3>
+            <div style="display:flex; gap:8px;">
+              <input class="input" id="pb-search" placeholder="Search PB ID, Name, PS..." style="width:220px;" oninput="Workflows.renderPBMatrix()">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SNo</th><th>Pointbook ID</th><th>Name &amp; Category</th><th>Type</th>
+                  <th>Sector / PS</th><th>Holder &amp; Contact</th><th>Geo Coordinates</th><th>Status</th><th>Plans</th>
+                </tr>
+              </thead>
+              <tbody id="pb-matrix-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 5: DIAL 100 EMERGENCY DIVERSION FLOW
+           ================================================================ -->
+      <section id="view-dial100" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dial 100 Emergency Dispatch &amp; Route Diversion State Machine</h1>
+            <p class="page-subtitle">Implements PatrolManagement flowchart: Route Decide → Dial 100 Call → Nearest Unit Route Diversion → Complete Call → Points Balance → Continue / Close Day</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Live Workflow State Machine (PatrolManagement Diagram)</h3>
+              <span class="badge badge-info" id="d100-state-badge">STATE: ROUTE_DECIDE</span>
+            </div>
+            <div class="flowchart-wrap">
+              <div class="flow-row"><div class="flow-node root" id="fn-root">Patrol Management</div></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-row">
+                <div class="flow-node newreq" id="fn-entry">Beat Point Entry</div>
+                <div class="flow-node enhance" id="fn-timesel">Beat Point Time &amp; Shift</div>
+                <div class="flow-node enhance" id="fn-shiftofd">Shift Wise Beat of the Day</div>
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-row"><div class="flow-node avail" id="fn-plans">Beat Point Plans &amp; Update (Plan A-D)</div></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-row"><div class="flow-node avail" id="fn-decide">Route Decide (Normal Beat Patrolling)</div></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-row">
+                <div class="flow-node newreq" id="fn-divert">Route Diversion (Nearest Patrol Assigned)</div>
+                <span class="flow-arrow">←</span>
+                <div class="flow-node newreq" id="fn-call">Dial 100 Call</div>
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-row"><div class="flow-node newreq" id="fn-complete">Complete Call</div></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-row"><div class="flow-node enhance" id="fn-balance">Show Points Balance → Continue (or) Close the Day</div></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Step-by-Step Interactive Diversion Controls</h3></div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>Emergency Scenario</label>
+                  <select class="select" id="d100-type">
+                    <option value="Murder|P1|17.3915|78.4765|Abids PS|Tilak Road Jewelry Lane">Murder (P1 - Immediate 0-10m) — Abids</option>
+                    <option value="Armed Robbery|P1|17.4435|78.3772|Gachibowli PS|Wipro Circle ATM Corridor">Armed Robbery (P1 - 15m) — Gachibowli</option>
+                    <option value="College Security Alert|P2|17.3935|78.4695|Abids PS|Nampally Junior College Gate">College Security Alert (P2 - 20m) — Nampally</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-danger" onclick="Workflows.triggerDial100FromPanel()">
+                  1️⃣ Trigger Dial 100 Call &amp; Divert Nearest Patrol Unit 🚨
+                </button>
+                <button class="btn btn-primary" onclick="Workflows.completeDial100Call()">
+                  2️⃣ Complete Call &amp; Calculate Points Balance 📋
+                </button>
+                <div style="display:flex; gap:10px;">
+                  <button class="btn btn-success" style="flex:1; justify-content:center;" onclick="Workflows.decidePostCall('continue')">
+                    3A. Continue Beat Route ▶
+                  </button>
+                  <button class="btn btn-amber" style="flex:1; justify-content:center;" onclick="Workflows.decidePostCall('close_day')">
+                    3B. Close The Day ⏹
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" id="d100-status-card">
+              <div class="card-header"><h3 class="card-title">Diversion &amp; Points Balance Telemetry</h3></div>
+              <div id="d100-details-body">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 6: MOBILE CONSTABLE APP SIMULATOR
+           ================================================================ -->
+      <section id="view-mobile-app" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Field Constable Mobile App Simulator (Blue Colts / Patrol Car)</h1>
+            <p class="page-subtitle">Interactive phone demo: 30m geofence check, time deviation counter, Telugu/Hindi voice-to-English logging &amp; incident closure</p>
+          </div>
+        </div>
+
+        <div class="mobile-stage">
+          <!-- Smartphone Frame -->
+          <div class="phone-frame">
+            <div class="phone-header">
+              <span>☰</span>
+              <span>Patrol Management</span>
+              <span>🔔</span>
+            </div>
+            <div class="phone-tabs">
+              <button class="phone-tab active" data-mtab="visiting" onclick="MobileSim.switchTab('visiting')">Visiting</button>
+              <button class="phone-tab" data-mtab="addnew" onclick="MobileSim.switchTab('addnew')">Add New</button>
+              <button class="phone-tab" data-mtab="incidents" onclick="MobileSim.switchTab('incidents')">Incidents</button>
+              <button class="phone-tab" data-mtab="myreport" onclick="MobileSim.switchTab('myreport')">My Report</button>
+            </div>
+            <div class="phone-jurisdiction">
+              <span><b>District</b>HYDERABAD</span>
+              <span><b>Zone</b>EZ</span>
+              <span><b>PS</b>ABIDS PS</span>
+              <span><b>Vehicle</b>BC3</span>
+            </div>
+
+            <div class="phone-body">
+              <!-- Tab 1: Visiting Map -->
+              <div id="mtab-visiting">
+                <div style="display:flex; justify-content:space-between; padding:6px 10px; background:#fff; font-size:11px; border-bottom:1px solid #e2e8f0;">
+                  <span><b style="color:#e91e63;">WORK MODE:</b> PLAN A</span>
+                  <span><b style="color:#e91e63;">SHIFT:</b> SHIFT 1</span>
+                </div>
+                <div id="map-mobile" style="height:290px; width:100%;"></div>
+                <div style="padding:8px 10px; font-size:11px;">
+                  <div style="display:flex; justify-content:space-around; margin-bottom:6px; font-weight:700;">
+                    <span><span class="dot dot-green"></span> Visited (<span id="m-cnt-visited">0</span>)</span>
+                    <span><span class="dot dot-red"></span> Sensitive (<span id="m-cnt-sens">0</span>)</span>
+                    <span><span class="dot" style="background:#2563eb;"></span> Non Visited (<span id="m-cnt-non">0</span>)</span>
+                  </div>
+                  <div style="font-weight:700; color:#0b4f8a; margin-bottom:4px;">Tap a Beat Point below (or pin on map) to Check-In:</div>
+                  <div id="mobile-pb-quicklist" style="display:flex; flex-direction:column; gap:5px;"></div>
+                </div>
+              </div>
+
+              <!-- Tab 2: Add New PB -->
+              <div id="mtab-addnew" style="display:none; padding:12px;">
+                <h4 style="margin:0 0 8px; color:#0b4f8a;">Quick Field Point Book Entry</h4>
+                <div class="field" style="margin-bottom:8px;"><label>Place Name</label><input class="input" id="m-npb-name" placeholder="e.g., Koti SBI ATM"></div>
+                <div class="field" style="margin-bottom:8px;"><label>Category</label>
+                  <select class="select" id="m-npb-cat"><option>ATM</option><option>College</option><option>Wine Shop</option><option>Mandap/Pandal</option></select>
+                </div>
+                <div class="field" style="margin-bottom:8px;"><label>Type</label>
+                  <select class="select" id="m-npb-type"><option>Security Guard</option><option>Picket</option><option>Ganesh Pandal</option><option>Check Post</option></select>
+                </div>
+                <div class="field" style="margin-bottom:8px;"><label>Holder Name &amp; Mobile</label><input class="input" id="m-npb-holder" placeholder="Raju, 9848011223"></div>
+                <div class="field" style="margin-bottom:10px;"><label>Address</label><input class="input" id="m-npb-addr" placeholder="Koti Main Road, Hyderabad"></div>
+                <button class="btn btn-pink" style="width:100%; justify-content:center;" onclick="MobileSim.submitNewPB()">NEXT &amp; REGISTER POINT BOOK</button>
+              </div>
+
+              <!-- Tab 3: Mobile Incidents & Closure -->
+              <div id="mtab-incidents" style="display:none; padding:10px;">
+                <h4 style="margin:0 0 8px; color:#0b4f8a;">Assigned Beat Incidents</h4>
+                <div id="mobile-incidents-list"></div>
+              </div>
+
+              <!-- Tab 4: My Report -->
+              <div id="mtab-myreport" style="display:none; padding:10px;">
+                <h4 style="margin:0 0 8px; color:#0b4f8a;">My Shift Check-In Log</h4>
+                <div id="mobile-myreport-list"></div>
+              </div>
+
+              <!-- Point Book Visiting Modal inside Phone (matches image6.jpeg) -->
+              <div class="phone-modal-overlay" id="phone-visit-modal">
+                <div class="phone-modal">
+                  <div class="phone-modal-head">POINTBOOK VISITING</div>
+                  <div class="phone-modal-body">
+                    <div style="background:linear-gradient(135deg,#0b4f8a,#1d4ed8); color:#fff; padding:10px; border-radius:6px; text-align:center; margin-bottom:8px; font-weight:700;" id="mvis-banner">
+                      📍 Andhra Bank ATM
+                    </div>
+                    <div class="kv-row"><span class="k">POINTBOOK ID</span><span class="v" id="mvis-id">-</span></div>
+                    <div class="kv-row"><span class="k">SECTOR</span><span class="v" id="mvis-sector">-</span></div>
+                    <div class="kv-row"><span class="k">TYPE</span><span class="v" id="mvis-type">-</span></div>
+                    <div class="kv-row"><span class="k">CATEGORY</span><span class="v" id="mvis-cat">-</span></div>
+                    <div class="kv-row"><span class="k">PBH DETAILS</span><span class="v" id="mvis-holder">-</span></div>
+                    <div class="kv-row"><span class="k">ROUTE PLAN TIME</span><span class="v pink" id="mvis-time">10:30 AM</span></div>
+                    <div class="kv-row"><span class="k">PS</span><span class="v" id="mvis-ps">-</span></div>
+                    <div class="kv-row"><span class="k">DEVIATION IN TIME</span><span class="v pink" id="mvis-dev">00:02:30 HRS</span></div>
+
+                    <!-- 30m Geofence Simulator Slider -->
+                    <div style="background:#f1f5f9; padding:8px; border-radius:6px; margin:8px 0;">
+                      <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700;">
+                        <span>GPS Distance to PB: <span id="mvis-dist-lbl">15m</span></span>
+                        <span id="mvis-geo-badge" style="color:#16a34a;">✔ Within 30m</span>
+                      </div>
+                      <input type="range" min="2" max="90" value="15" id="mvis-dist-slider" style="width:100%;" oninput="MobileSim.updateDistancePreview(this.value)">
+                    </div>
+
+                    <!-- Voice-to-Text Native Input -->
+                    <div style="margin-bottom:6px;">
+                      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <label style="font-size:11px; font-weight:700;">Remarks (Speak Telugu / Hindi / English)</label>
+                        <button class="btn btn-primary btn-sm" onclick="MobileSim.startVoiceDictation()">🎤 Speak</button>
+                      </div>
+                      <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:5px;">
+                        <button class="btn btn-outline btn-sm" onclick="MobileSim.fillSampleVoice('telugu1')">Telugu: Safe ATM</button>
+                        <button class="btn btn-outline btn-sm" onclick="MobileSim.fillSampleVoice('telugu2')">Telugu: Suspicious College</button>
+                        <button class="btn btn-outline btn-sm" onclick="MobileSim.fillSampleVoice('hindi1')">Hindi: Crowd Alert</button>
+                      </div>
+                      <textarea class="textarea" id="mvis-remarks" rows="2" placeholder="Type or speak field remarks..."></textarea>
+                    </div>
+
+                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; margin-bottom:10px;">
+                      <input type="checkbox" id="mvis-sensitive"> Flag as Sensitive Area / Activity
+                    </label>
+
+                    <div style="display:flex; gap:8px;">
+                      <button class="btn btn-pink" style="flex:1; justify-content:center;" onclick="MobileSim.closeVisitModal()">CANCEL</button>
+                      <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="MobileSim.submitVisit()">SUBMIT</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right-hand Live Feedback & Translation Result Panel -->
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Mobile Check-In Verification &amp; AI Translation Output</h3>
+              </div>
+              <div id="mobile-checkin-result" style="font-size:13px; color:var(--text-muted);">
+                Tap any Point Book in the mobile simulator (left) to demonstrate:<br>
+                1. <b>30-meter Geofence Check</b> (drag the GPS distance slider inside or outside 30m)<br>
+                2. <b>Time Deviation Calculation</b> (e.g., <code>00:02:30 HRS</code>)<br>
+                3. <b>Native Telugu / Hindi Voice-to-English Police Log Translation</b>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Recent Field PB Check-Ins (Synced to Command Center)</h3></div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>PB ID</th><th>Geofence</th><th>Deviation</th><th>Native Input</th><th>Translated Police Log</th></tr>
+                  </thead>
+                  <tbody id="mobile-recent-visits-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 7: INCIDENTS & SLA CONSOLE
+           ================================================================ -->
+      <section id="view-incidents" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Incident Management &amp; SLA Breach Monitoring</h1>
+            <p class="page-subtitle">Murder (P1: 0-10 min), Armed Robbery (P1/P2: 15 min), College Security Alert (P2: 20 min), Traffic/Nuisance (P3: 60 min)</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Report New Incident (Auto-Assigns Nearest Patrol Unit)</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Incident Type</label>
+              <select class="select" id="inc-type">
+                <option value="Murder">Murder (P1 - 10 min SLA)</option>
+                <option value="Armed Robbery">Armed Robbery (P1 - 15 min SLA)</option>
+                <option value="College Security Alert" selected>College Security Alert (P2 - 20 min SLA)</option>
+                <option value="Theft">Theft (P2 - 30 min SLA)</option>
+                <option value="Public Nuisance">Public Nuisance (P3 - 60 min SLA)</option>
+              </select>
+            </div>
+            <div class="field"><label>Police Station</label>
+              <select class="select" id="inc-station">
+                <option>Abids PS</option><option>Gachibowli PS</option><option>Panjagutta PS</option><option>Raidurgam PS</option>
+              </select>
+            </div>
+            <div class="field"><label>Location Name</label><input class="input" id="inc-loc" value="University of Hyderabad Main Gate"></div>
+            <div class="field"><label>Latitude</label><input class="input" id="inc-lat" type="number" step="0.0001" value="17.4565"></div>
+            <div class="field"><label>Longitude</label><input class="input" id="inc-lon" type="number" step="0.0001" value="78.3324"></div>
+            <div class="field"><label>Description</label><input class="input" id="inc-desc" value="Crowd disturbance reported near campus perimeter."></div>
+          </div>
+          <button class="btn btn-danger" onclick="Workflows.createIncident()">🚨 Create Incident &amp; Dispatch Nearest Patrol</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Live Incident Queue &amp; Case Closure</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Code</th><th>Type</th><th>Priority</th><th>Location &amp; Station</th><th>Assigned Unit</th><th>SLA</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody id="incidents-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 8: AI INSIGHTS & SHO REPORTS
+           ================================================================ -->
+      <section id="view-ai-reports" class="view-panel">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">AI Patrol Recommendations, Blind Spots &amp; SHO Audit Reports</h1>
+            <p class="page-subtitle">Automatic &gt;12h Blind-Spot detection, Event/Dharna advisories, Telugu-to-English NLP sandbox &amp; TSCOP deviation export</p>
+          </div>
+          <a class="btn btn-success" href="/api/reports/export.csv" target="_blank">⬇ Export Official CSV Report</a>
+        </div>
+
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">⚠️ Blind Spots Detected (&gt; 12 Hours Unvisited)</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>PB Code</th><th>Location</th><th>PS</th><th>Hours Overdue</th><th>Severity</th></tr></thead>
+                <tbody id="ai-blindspots-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🗣️ Native-to-English Police Log Translator Sandbox</h3>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+              <button class="btn btn-outline btn-sm" onclick="Workflows.testTranslate('కళాశాల గేటు వద్ద అనుమానాస్పద వ్యక్తులు ఉన్నారు')">Telugu: College Gate Alert</button>
+              <button class="btn btn-outline btn-sm" onclick="Workflows.testTranslate('పబ్లిక్ గార్డెన్స్ వద్ద ధర్నా కారణంగా ట్రాఫిక్ మళ్లింపు అవసరం')">Telugu: Public Gardens Dharna</button>
+              <button class="btn btn-outline btn-sm" onclick="Workflows.testTranslate('कॉलेज गेट के पास संदिग्ध व्यक्ति घूम रहे हैं, जांच की गई')">Hindi: Suspicious Activity</button>
+              <button class="btn btn-outline btn-sm" onclick="Workflows.testTranslate('Wine shop daggara raddi undi urgent backup')">Hinglish/Tenglish</button>
+            </div>
+            <textarea class="textarea" id="ai-trans-input" rows="2" placeholder="Enter Telugu, Hindi, or English field note..."></textarea>
+            <button class="btn btn-primary" style="margin-top:8px;" onclick="Workflows.runTranslateSandbox()">Translate to Formal Police Log</button>
+            <div id="ai-trans-output" style="margin-top:10px; padding:10px; border-radius:6px; background:var(--bg-elevated); font-size:12.5px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Event vs Offender Surveillance &amp; TSCOP Deviation Audit</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Event / Gathering</th><th>Location</th><th>Watchlist Offenders</th><th>Assigned Unit</th><th>Status</th></tr></thead>
+              <tbody id="reports-offenders-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Official Point Book Deviation &amp; Emergency Diversion Audit</h3>
+            <span id="reports-summary-pill" class="badge badge-info"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>PB Code</th><th>Location</th><th>Plan / Shift</th><th>Scheduled</th><th>Actual</th><th>Deviation</th><th>Distance</th><th>English Log</th></tr></thead>
+              <tbody id="reports-audit-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/maps.js"></script>
+  <script src="/js/workflows.js"></script>
+  <script src="/js/mobile.js"></script>
+</body>
+</html>
